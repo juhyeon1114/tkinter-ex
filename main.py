@@ -1,10 +1,13 @@
 ####################################
 # Merge the Images Program
 ####################################
+from enum import EnumMeta
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
 from tkinter import *
 from tkinter import filedialog
+from PIL import Image
+import os
 
 '''
 init
@@ -16,17 +19,40 @@ root.resizable(False, False)
 '''
 functions
 '''
-def startMerging():
-    print(combo_width.get())
-    print(combo_space.get())
-    print(combo_format.get())
+def mergeImages():
+    images = [Image.open(x) for x in list_file.get(0, END)] # 한 줄 for문
+    widths = [x.size[0] for x in images] # size[0] == image width
+    heights = [x.size[1] for x in images] # size[1] == image height
+    
+    max_width = max(widths)
+    total_height = sum(heights)
 
+    result_img = Image.new('RGB', (max_width, total_height), (255, 255, 255)) # (색구성), (가로 세로크기), (배경색)
+    y_offset = 0
+    for idx, img in enumerate(images): # img붙여주기
+        result_img.paste(img, (0, y_offset))
+        y_offset += img.size[1]
+
+        # progress bar
+        progress = (idx + 1) / len(images) * 100
+        p_var.set(progress)
+        progressbar.update()
+
+
+    dest_path = os.path.join(txt_dest_path.get(), 'py_gui.jpg')
+    result_img.save(dest_path)
+    msgbox.showinfo('info', 'success')
+
+def startMerging():
     if list_file.size() == 0:
         msgbox.showwarning('Warning', 'Add image files')
         return
 
     if len(txt_dest_path.get()) == 0 :
         msgbox.showwarning('Warning', 'Add destination directory')
+        return
+    
+    mergeImages()
 
 def add_file():
     files = filedialog.askopenfilenames(
