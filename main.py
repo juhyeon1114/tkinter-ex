@@ -1,7 +1,6 @@
 ####################################
 # Merge the Images Program
 ####################################
-from enum import EnumMeta
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
 from tkinter import *
@@ -21,8 +20,9 @@ functions
 '''
 def mergeImages():
     images = [Image.open(x) for x in list_file.get(0, END)] # 한 줄 for문
-    widths = [x.size[0] for x in images] # size[0] == image width
-    heights = [x.size[1] for x in images] # size[1] == image height
+    # widths = [x.size[0] for x in images] # size[0] == image width
+    # heights = [x.size[1] for x in images] # size[1] == image height
+    widths, heights = zip(*(x.size for x in images)) # unzip
     
     max_width = max(widths)
     total_height = sum(heights)
