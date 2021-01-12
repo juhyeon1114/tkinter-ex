@@ -2,16 +2,32 @@
 # Merge the Images Program
 ####################################
 import tkinter.ttk as ttk
+import tkinter.messagebox as msgbox
 from tkinter import *
 from tkinter import filedialog
 
+'''
+init
+'''
 root = Tk()
 root.title('hello')
 root.resizable(False, False)
 
 '''
-file frame
+functions
 '''
+def startMerging():
+    print(combo_width.get())
+    print(combo_space.get())
+    print(combo_format.get())
+
+    if list_file.size() == 0:
+        msgbox.showwarning('Warning', 'Add image files')
+        return
+
+    if len(txt_dest_path.get()) == 0 :
+        msgbox.showwarning('Warning', 'Add destination directory')
+
 def add_file():
     files = filedialog.askopenfilenames(
         title='select image files',
@@ -20,10 +36,21 @@ def add_file():
     )
     for file in files:
         list_file.insert(END, file)
+
 def delete_files():
     for index in reversed(list_file.curselection()):
         list_file.delete(index)
 
+def browse_dest_path():
+    folder_selected = filedialog.askdirectory()
+    if folder_selected == '':
+        return
+    txt_dest_path.delete(0, END)
+    txt_dest_path.insert(0, folder_selected)
+
+'''
+file frame
+'''
 file_frame = Frame(root)
 file_frame.pack(fill='x', padx=5, pady=5)
 # add file btn
@@ -55,7 +82,7 @@ path_frame.pack(fill='x', padx=5, pady=5, ipady=5)
 txt_dest_path = Entry(path_frame)
 txt_dest_path.pack(side='left', fill='x', expand=True, padx=5, pady=5, ipady=4) # ipad == inner padding
 # finde path btn
-btn_dest_path = Button(path_frame, text='find', width=10)
+btn_dest_path = Button(path_frame, text='find', width=10, command=browse_dest_path)
 btn_dest_path.pack(side='right', padx=5, pady=5)
 
 '''
@@ -100,9 +127,6 @@ running frame
 '''
 frame_run = Frame(root)
 frame_run.pack(fill='x', padx=5, pady=5)
-
-def startMerging():
-    pass
 # close btn
 btn_close = Button(frame_run, padx=5, pady=5, text='close', width=12, command=root.quit)
 btn_close.pack(side='right', padx=5, pady=5)
