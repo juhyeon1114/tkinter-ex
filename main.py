@@ -19,27 +19,62 @@ root.resizable(False, False)
 functions
 '''
 def mergeImages():
+    # 가로넓이
+    img_width = combo_width.get()
+    if (img_width == 'maintain') :
+        img_width = -1 # -1 일때는 원본 기준으로 이미지 합침
+    else :
+        img_width = int(img_width)
+
+    # 간격
+    img_space = combo_space.get()
+    if img_space == 'narrow':
+        img_space = 30
+    elif img_space == 'normal':
+        img_space = 60
+    elif img_space == 'wide':
+        img_space = 90
+    else :
+        img_space = 0
+
+    # 포맷
+    img_format = combo_format.get().lower() # PNG, JPG, BMP를 받아와서 소문자로 변경
+
+    image_sizes = []
     images = [Image.open(x) for x in list_file.get(0, END)] # 한 줄 for문
+    if img_width > -1:
+        image_sizes = [(int(img_width), int(int(img_width) * x.size[1] / x.size[0])) for x in images] #
+    else :
+        image_sizes = [(int(x.size[0]), int(x.size[1])) for x in images] # 원본 사이즈 사용
+
     # widths = [x.size[0] for x in images] # size[0] == image width
     # heights = [x.size[1] for x in images] # size[1] == image height
-    widths, heights = zip(*(x.size for x in images)) # unzip
+    widths, heights = zip(*image_sizes) # unzip
     
     max_width = max(widths)
     total_height = sum(heights)
 
-    result_img = Image.new('RGB', (max_width, total_height), (255, 255, 255)) # (색구성), (가로 세로크기), (배경색)
+    # 이미지들을 담을 흰 배경의 이미지 만들기
+    if img_space > 0:
+        total_height += (img_space * (len(images)-1)) # 이미지 간의 간격 추가
+
+    result_img = Image.new('RGB', (int(max_width), int(total_height)), (255, 255, 255)) # (색구성), (가로 세로크기), (배경색)
     y_offset = 0
     for idx, img in enumerate(images): # img붙여주기
+        # width가 원본이 아닐 때에는 resizing
+        if img_width > -1:
+            img = img.resize(image_sizes[idx])
+
         result_img.paste(img, (0, y_offset))
-        y_offset += img.size[1]
+        y_offset += (img.size[1] + img_space)
 
         # progress bar
         progress = (idx + 1) / len(images) * 100
         p_var.set(progress)
         progressbar.update()
 
-
-    dest_path = os.path.join(txt_dest_path.get(), 'py_gui.jpg')
+    filename = 'py_gui.' + img_format
+    dest_path = os.path.join(txt_dest_path.get(), filename)
     result_img.save(dest_path)
     msgbox.showinfo('info', 'success')
 
